@@ -41,7 +41,7 @@ def generate_tweet(topic="something random or from a list"):
             {"role": "system", "content": SYSTEM_PROMPT.format(topic=topic)},
             {"role": "user",   "content": "Write one tweet now."},
         ],
-        model="llama-3.1-70b-versatile",   # or mixtral, gemma2-27b, etc.
+        model="llama-3.3-70b-versatile",   # or mixtral, gemma2-27b, etc.
         temperature=0.8,   # 0.7–1.0 for more personality variation
         max_tokens=100,
     )
