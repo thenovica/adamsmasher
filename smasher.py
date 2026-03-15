@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     if tweet_text:
         try:
-            response = client_x.create_tweet(text=tweet_text)
+            response = client_x.create_tweet(text=tweet_text) # Novica was here :>
             print("Posted:", tweet_text)
             print("Tweet ID:", response.data["id"])
         except Exception as e:
