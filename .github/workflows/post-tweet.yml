@@ -2,22 +2,22 @@ name: Adam Smasher Bot
 
 on:
   schedule:
-    - cron: '0 12 * * *'   # Every day at 12:00 UTC (~once/day; adjust as needed, e.g. '0 */6 * * *' for every 6 hours)
-  workflow_dispatch:       # Lets you test manually from GitHub UI
+    - cron: '0 12 * * *'   # Every day at 12:00 UTC (adjust as needed)
+  workflow_dispatch:       # Manual trigger for testing
 
 jobs:
   tweet:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6          # Updated to latest (Node 24 compatible)
+    - uses: actions/checkout@v6
 
     - name: Set up Python
-      uses: actions/setup-python@v6       # Updated to latest
+      uses: actions/setup-python@v6
       with:
         python-version: '3.12'
 
     - name: Install dependencies
-      run: pip install tweepy google-genai  # Changed: google-genai for Gemini SDK
+      run: pip install tweepy google-genai   # Modern Gemini SDK
 
     - name: Run bot
       env:
@@ -25,5 +25,5 @@ jobs:
         X_API_SECRET: ${{ secrets.X_API_SECRET }}
         X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
         X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # Changed: Use GEMINI_API_KEY
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       run: python smasher.py
