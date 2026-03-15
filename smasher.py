@@ -1,6 +1,6 @@
 import os
 import tweepy
-import google.generativeai as genai  # pip install google-generativeai
+import google-generativeai as genai  # pip install google-generativeai
 
 # ── Secrets (use GitHub secrets or env vars) ─────────────────────────────
 X_API_KEY         = os.getenv("X_API_KEY")
