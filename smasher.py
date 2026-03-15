@@ -3,12 +3,12 @@ import tweepy
 from groq import Groq  # pip install groq
 
 # ── Secrets (use GitHub secrets or env vars) ─────────────────────────────
-X_API_KEY         = os.getenv("Nqd6rMvhE3ZtSPdb4dPbjFhTO")
-X_API_SECRET      = os.getenv("fkaB70okcffaESds1zfkURJXJoFmp69XwfPAlaoMw7EwYMbCFO")
-X_ACCESS_TOKEN    = os.getenv("1694511724320243712-C5yvYAdKUj8pHYwhRcanC2Rpad2SNU")
-X_ACCESS_SECRET   = os.getenv("v11th6jdxsWS2LzxtnsK6HdWxTMzKIJ3NDnRkviGd6HeW")
+X_API_KEY         = os.getenv("X_API_KEY")
+X_API_SECRET      = os.getenv("X_API_SECRET")
+X_ACCESS_TOKEN    = os.getenv("X_ACCESS_TOKEN")
+X_ACCESS_SECRET   = os.getenv("X_ACCESS_SECRET")
 
-GROQ_API_KEY      = os.getenv("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")   # get free at console.groq.com/keys
+GROQ_API_KEY      = os.getenv("GROQ_API_KEY")   # get free at console.groq.com/keys
 # ────────────────────────────────────────────────────────────────────────
 
 client_x = tweepy.Client(
