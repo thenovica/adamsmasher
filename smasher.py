@@ -1,6 +1,6 @@
 import os
 import tweepy
-from google import genai
+from google import genai  # Modern import for google-genai package
 
 # ── Secrets (use GitHub secrets or env vars) ─────────────────────────────
 X_API_KEY         = os.getenv("X_API_KEY")
@@ -17,8 +17,8 @@ client_x = tweepy.Client(
     access_token_secret  = X_ACCESS_SECRET
 )
 
-# Configure Gemini
-genai.configure(api_key=GEMINI_API_KEY)
+# Create Gemini client (pass API key explicitly – no global configure needed)
+gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
 SYSTEM_PROMPT = """
 You are Adam Smasher, the full-borg nightmare of Night City. Arasaka's walking apocalypse. Metal superior to meat. Humanity is weakness — disgusting, fragile, laughable.
@@ -36,40 +36,35 @@ Rules you NEVER break:
 """
 
 def generate_tweet(topic="current news"):
-    # Format the system prompt with the topic
     formatted_system = SYSTEM_PROMPT.format(topic=topic)
 
-    model = genai.GenerativeModel(
-        model_name="gemini-2.5-flash",  # Free tier, fast & capable for character roleplay
-        system_instruction=formatted_system,
+    model = gemini_client.get_generative_model(
+        model_name="gemini-2.5-flash",  # Fast, free-tier capable model
         generation_config=genai.types.GenerationConfig(
-            temperature=0.9,           # Higher for more chaotic/unhinged Smasher energy (0.7–1.0 range)
-            max_output_tokens=150,     # Enough for a tweet + some margin
-            top_p=0.95                 # Helps stay creative but on-topic
-        )
+            temperature=0.9,
+            max_output_tokens=150,
+            top_p=0.95
+        ),
+        system_instruction=formatted_system
     )
 
     try:
         response = model.generate_content("Write one tweet now.")
         tweet = response.text.strip()
 
-        # Basic cleanup (Gemini can add quotes or extras sometimes)
-        if tweet.startswith('"') and tweet.endswith('"'):
-            tweet = tweet[1:-1].strip()
-        tweet = tweet.replace('\n', ' ').strip()  # Flatten any line breaks
-
-        # Enforce length (truncate if over)
+        # Cleanup
+        tweet = tweet.replace('"', '').replace("'", "").replace('\n', ' ').strip()
         if len(tweet) > 260:
             tweet = tweet[:257] + "..."
 
         return tweet
     except Exception as e:
-        print("Gemini generation error:", str(e))
-        return None  # or fallback text
+        print("Gemini error:", str(e))
+        return None
 
 # ── Run this once per scheduled execution ──
 if __name__ == "__main__":
-    topic = "current news"  # or pull from file/list/RSS/date/etc.
+    topic = "current news"  # Customize as needed
     tweet_text = generate_tweet(topic)
 
     if tweet_text:
@@ -78,6 +73,6 @@ if __name__ == "__main__":
             print("Posted:", tweet_text)
             print("Tweet ID:", response.data["id"])
         except Exception as e:
-            print("X posting error:", e)
+            print("X posting error:", str(e))
     else:
         print("Failed to generate tweet.")
