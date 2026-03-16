@@ -1,13 +1,13 @@
 import os
 import tweepy
-from google import genai  # Modern import for google-genai package
+from google import genai  # Modern SDK import
 
-# ── Secrets (use GitHub secrets or env vars) ─────────────────────────────
+# ── Secrets ──────────────────────────────────────────────────────────────
 X_API_KEY         = os.getenv("X_API_KEY")
 X_API_SECRET      = os.getenv("X_API_SECRET")
 X_ACCESS_TOKEN    = os.getenv("X_ACCESS_TOKEN")
 X_ACCESS_SECRET   = os.getenv("X_ACCESS_SECRET")
-GEMINI_API_KEY    = os.getenv("GEMINI_API_KEY")  # Get free at https://aistudio.google.com/app/apikey
+GEMINI_API_KEY    = os.getenv("GEMINI_API_KEY")  # from https://aistudio.google.com/app/apikey
 # ────────────────────────────────────────────────────────────────────────
 
 client_x = tweepy.Client(
@@ -17,7 +17,7 @@ client_x = tweepy.Client(
     access_token_secret  = X_ACCESS_SECRET
 )
 
-# Create Gemini client (pass API key explicitly – no global configure needed)
+# Gemini client
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
 SYSTEM_PROMPT = """
@@ -38,18 +38,21 @@ Rules you NEVER break:
 def generate_tweet(topic="current news"):
     formatted_system = SYSTEM_PROMPT.format(topic=topic)
 
-    model = gemini_client.get_generative_model(
-        model_name="gemini-2.5-flash",  # Fast, free-tier capable model
-        generation_config=genai.types.GenerationConfig(
-            temperature=0.9,
-            max_output_tokens=150,
-            top_p=0.95
-        ),
-        system_instruction=formatted_system
-    )
-
     try:
-        response = model.generate_content("Write one tweet now.")
+        # Modern SDK call: direct generate_content on client.models
+        response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash",  # or "gemini-2.5-flash-lite-preview" for higher limits
+            contents=[
+                {"role": "model", "parts": [{"text": formatted_system}]},  # System instruction as model role
+                {"role": "user", "parts": [{"text": "Write one tweet now."}]}
+            ],
+            config=genai.types.GenerationConfig(
+                temperature=0.9,
+                max_output_tokens=150,
+                top_p=0.95
+            )
+        )
+
         tweet = response.text.strip()
 
         # Cleanup
@@ -58,18 +61,19 @@ def generate_tweet(topic="current news"):
             tweet = tweet[:257] + "..."
 
         return tweet
+
     except Exception as e:
         print("Gemini error:", str(e))
         return None
 
-# ── Run this once per scheduled execution ──
+# ── Main execution ──
 if __name__ == "__main__":
-    topic = "current news"  # Customize as needed
+    topic = "current news"  # Change or make dynamic
     tweet_text = generate_tweet(topic)
 
     if tweet_text:
         try:
-            response = client_x.create_tweet(text=tweet_text) # Novica was here :>
+            response = client_x.create_tweet(text=tweet_text)
             print("Posted:", tweet_text)
             print("Tweet ID:", response.data["id"])
         except Exception as e:
