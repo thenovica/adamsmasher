@@ -1,6 +1,6 @@
 import os
 import tweepy
-from google import genai  # Modern SDK
+from google import genai
 
 # ── Secrets ──────────────────────────────────────────────────────────────
 X_API_KEY         = os.getenv("X_API_KEY")
@@ -38,8 +38,9 @@ def generate_tweet(topic="current news"):
     formatted_system = SYSTEM_PROMPT.format(topic=topic)
 
     try:
+        # Modern, tools-free call – system as first "model" message
         response = gemini_client.models.generate_content(
-            model="models/gemini-2.5-flash",  # Prefix with 'models/' for some SDK calls
+            model="models/gemini-2.5-flash",
             contents=[
                 {"role": "model", "parts": [{"text": formatted_system}]},
                 {"role": "user", "parts": [{"text": "Write one tweet now."}]}
@@ -49,7 +50,6 @@ def generate_tweet(topic="current news"):
                 max_output_tokens=150,
                 top_p=0.95
             )
-            # No 'tools' here unless you need function calling
         )
 
         tweet = response.text.strip()
