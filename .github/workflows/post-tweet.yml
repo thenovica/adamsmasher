@@ -2,8 +2,8 @@ name: Adam Smasher Bot
 
 on:
   schedule:
-    - cron: '0 12 * * *'   # Every day at 12:00 UTC (adjust as needed)
-  workflow_dispatch:       # Manual trigger for testing
+    - cron: '0 12 * * *'
+  workflow_dispatch:
 
 jobs:
   tweet:
@@ -17,7 +17,12 @@ jobs:
         python-version: '3.12'
 
     - name: Install dependencies
-      run: pip install tweepy google-genai   # Modern Gemini SDK
+      run: |
+        pip install --upgrade pip
+        pip install tweepy google-genai==1.*  # Force latest 1.x series (modern SDK in 2026)
+
+    - name: Show installed packages (debug)
+      run: pip list | grep -E 'google|genai|tweepy'
 
     - name: Run bot
       env:
