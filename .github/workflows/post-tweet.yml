@@ -16,13 +16,14 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install dependencies
+    - name: Install dependencies (force modern google-genai)
       run: |
-        pip install --upgrade pip
-        pip install tweepy google-genai==1.*  # Force latest 1.x series (modern SDK in 2026)
+        pip install --upgrade pip setuptools wheel
+        pip uninstall -y google-generativeai || true  # remove legacy if present
+        pip install tweepy google-genai --no-cache-dir  # fresh install, no cache
 
-    - name: Show installed packages (debug)
-      run: pip list | grep -E 'google|genai|tweepy'
+    - name: Debug - show installed packages
+      run: pip list | grep -i 'google\|genai\|tweepy\|protobuf'
 
     - name: Run bot
       env:
