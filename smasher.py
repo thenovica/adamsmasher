@@ -1,8 +1,7 @@
 import os
 import tweepy
-from google import genai  # MUST be this import for modern google-genai
-
-print("Imported genai successfully")  # Debug line
+from google import genai
+from google.genai import types   # ← This was the missing piece
 
 # ── Secrets ──────────────────────────────────────────────────────────────
 X_API_KEY         = os.getenv("X_API_KEY")
@@ -41,19 +40,20 @@ def generate_tweet(topic="current news"):
 
     try:
         response = gemini_client.models.generate_content(
-            model="models/gemini-2.5-flash",
-            contents=[
-                {"role": "model", "parts": [{"text": formatted_system}]},
-                {"role": "user", "parts": [{"text": "Write one tweet now."}]}
-            ],
-            config=genai.types.GenerationConfig(
+            model="gemini-2.5-flash",
+            contents="Write one tweet now.",
+            config=types.GenerateContentConfig(
+                system_instruction=formatted_system,   # System prompt goes here now
                 temperature=0.9,
                 max_output_tokens=150,
-                top_p=0.95
+                top_p=0.95,
+                tools=None                             # ← FORCED as you requested
             )
         )
 
         tweet = response.text.strip()
+
+        # Cleanup
         tweet = tweet.replace('"', '').replace("'", "").replace('\n', ' ').strip()
         if len(tweet) > 260:
             tweet = tweet[:257] + "..."
@@ -62,8 +62,6 @@ def generate_tweet(topic="current news"):
 
     except Exception as e:
         print("Gemini error:", str(e))
-        if hasattr(e, '__cause__') and e.__cause__:
-            print("Cause:", str(e.__cause__))
         return None
 
 if __name__ == "__main__":
