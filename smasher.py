@@ -1,13 +1,13 @@
 import os
 import tweepy
-from google import genai  # Modern SDK import
+from google import genai  # Modern SDK
 
 # ── Secrets ──────────────────────────────────────────────────────────────
 X_API_KEY         = os.getenv("X_API_KEY")
 X_API_SECRET      = os.getenv("X_API_SECRET")
 X_ACCESS_TOKEN    = os.getenv("X_ACCESS_TOKEN")
 X_ACCESS_SECRET   = os.getenv("X_ACCESS_SECRET")
-GEMINI_API_KEY    = os.getenv("GEMINI_API_KEY")  # from https://aistudio.google.com/app/apikey
+GEMINI_API_KEY    = os.getenv("GEMINI_API_KEY")
 # ────────────────────────────────────────────────────────────────────────
 
 client_x = tweepy.Client(
@@ -17,7 +17,6 @@ client_x = tweepy.Client(
     access_token_secret  = X_ACCESS_SECRET
 )
 
-# Gemini client
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
 SYSTEM_PROMPT = """
@@ -39,11 +38,10 @@ def generate_tweet(topic="current news"):
     formatted_system = SYSTEM_PROMPT.format(topic=topic)
 
     try:
-        # Modern SDK call: direct generate_content on client.models
         response = gemini_client.models.generate_content(
-            model="gemini-2.5-flash",  # or "gemini-2.5-flash-lite-preview" for higher limits
+            model="models/gemini-2.5-flash",  # Prefix with 'models/' for some SDK calls
             contents=[
-                {"role": "model", "parts": [{"text": formatted_system}]},  # System instruction as model role
+                {"role": "model", "parts": [{"text": formatted_system}]},
                 {"role": "user", "parts": [{"text": "Write one tweet now."}]}
             ],
             config=genai.types.GenerationConfig(
@@ -51,6 +49,7 @@ def generate_tweet(topic="current news"):
                 max_output_tokens=150,
                 top_p=0.95
             )
+            # No 'tools' here unless you need function calling
         )
 
         tweet = response.text.strip()
@@ -66,9 +65,8 @@ def generate_tweet(topic="current news"):
         print("Gemini error:", str(e))
         return None
 
-# ── Main execution ──
 if __name__ == "__main__":
-    topic = "current news"  # Change or make dynamic
+    topic = "current news"
     tweet_text = generate_tweet(topic)
 
     if tweet_text:
