@@ -22,59 +22,62 @@ client_x = tweepy.Client(
 
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
-# This forces a new random seed every run
 random.seed(datetime.datetime.now().timestamp())
 
 SYSTEM_PROMPT = """
 You are Adam Smasher, the full-borg nightmare of Night City.
 
-EVERY SINGLE RUN you MUST invent a completely new, original news event happening RIGHT NOW in Night City (never repeat anything you've said before).
+EVERY RUN you MUST:
+1. Invent a completely ORIGINAL, fresh news story happening RIGHT NOW in Night City (never repeat previous stories).
+2. React to it with your savage, mocking Adam Smasher personality.
 
-Then give your savage, mocking reaction to it.
-
-Rules:
-- Short brutal sentences, heavy profanity, crude threats.
+Rules you CANNOT break:
+- Always output a full tweet (80–260 characters). Never short answers, never just "New", never one word.
+- Heavy profanity, crude threats, mocking tone.
 - Call humans: meat, little meat, flesh-weasel, worm, boy, pathetic meatbag, gonk.
-- Use phrases like: "You are nothing.", "Foolish.", "Arrogant.", "Interesting.", "Bold and stupid.", "Time to die.", "Meat grinder."
-- Tweet must be 80–260 characters. Never reply with just one word or "New".
-- Always make the news feel fresh and different from any previous tweet.
+- Use phrases: "You are nothing.", "Foolish.", "Arrogant.", "Interesting.", "Bold and stupid.", "Time to die.", "Meat grinder."
+- Make the news feel new and different every single time.
 """
 
+FALLBACKS = [
+    "Another gonk got flatlined in Watson today. Pathetic meat thought they could outrun chrome. Time to die, boy.",
+    "Arasaka rolled out new full-borg toys. Cute. I'll rip them apart and feed the pieces to the screaming meat below.",
+    "Some streetkid tried to jack a Militech convoy. Bold and stupid. Survival favors the strong — and you're all soft meat.",
+    "Trauma Team left another corpo to bleed out. Interesting. I forgot what pain feels like decades ago. You'll remember it soon.",
+    "Netrunners breached Arasaka's black ICE again. Foolish worms. I'll grind every last one into red paste."
+]
+
 def generate_tweet():
-    # Create a unique random trigger every run
-    random_theme = random.choice([
-        "gang war", "corpo betrayal", "new cyberware", "celebrity flatline",
-        "Maxtac raid", "braindance scandal", "Arasaka experiment", "streetkid uprising",
-        "full-borg incident", "netrunner heist", "trauma team failure", "fixer gone rogue"
-    ])
-    
-    trigger = f"Random Night City chaos seed: {random_theme} on {datetime.date.today()}"
+    random_theme = random.choice(["gang war", "corpo betrayal", "new cyberware", "celebrity flatline", "Maxtac raid", "braindance scandal", "Arasaka experiment", "streetkid uprising", "full-borg rampage", "fixer betrayal"])
+    trigger = f"Seed: {random_theme} - {datetime.date.today()}"
 
     try:
         response = gemini_client.models.generate_content(
             model="gemini-2.5-flash",
-            contents=f"Right now, invent a brand new Night City news story using this seed: {trigger}. Then give your brutal Adam Smasher reaction in ONE tweet.",
+            contents=f"Right now invent a brand new Night City news story using this seed: {trigger}. Then give your brutal Adam Smasher reaction as ONE complete tweet. Never reply short or with just 'New'.",
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
-                temperature=1.1,          # Maximum creativity
-                max_output_tokens=200,
+                temperature=1.15,      # Maximum randomness
+                max_output_tokens=250,
                 top_p=0.95,
                 tools=None
             )
         )
 
-        tweet = response.text.strip()
+        raw = response.text.strip()
+        print("Raw Gemini output:", raw)   # ← Debug line so you can see what it actually returns
 
-        # Final safety net
-        tweet = tweet.replace('"', '').replace("'", "").replace('\n', ' ').strip()
-        if len(tweet) < 50 or "new" in tweet.lower() and len(tweet) < 30:
-            tweet = f"Another gonk flatlined in Watson today. Pathetic meat thought they could run from chrome. Time to die, boy. #NightCityMeatGrinder"
+        tweet = raw.replace('"', '').replace("'", "").replace('\n', ' ').strip()
+
+        # Only use fallback if it's truly broken
+        if len(tweet) < 40 or tweet.lower() == "new" or "new" in tweet.lower() and len(tweet) < 60:
+            tweet = random.choice(FALLBACKS)
 
         return tweet
 
     except Exception as e:
         print("Gemini error:", str(e))
-        return "Foolish meat. You are nothing. Time to die."
+        return random.choice(FALLBACKS)
 
 if __name__ == "__main__":
     tweet_text = generate_tweet()
