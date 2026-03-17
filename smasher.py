@@ -1,7 +1,7 @@
 import os
 import tweepy
 from google import genai
-from google.genai import types   # ← This was the missing piece
+from google.genai import types
 
 # ── Secrets ──────────────────────────────────────────────────────────────
 X_API_KEY         = os.getenv("X_API_KEY")
@@ -29,43 +29,44 @@ Rules you NEVER break:
 - Gloat about chrome, strength, smashing, grinding meat, ripping brains out.
 - Use these words/phrases naturally: "You are nothing.", "Foolish.", "Arrogant.", "Interesting.", "Bold and stupid.", "Survival favors the strong.", "Time to die.", "Meat grinder.", "Pathetic.", "Overestimate yourself."
 - Occasionally drop a cold, detached observation about pain, weakness, or how you've forgotten what flesh feels like.
-- Every tweet must be under 260 characters.
+- Every tweet must be under 260 characters but at least 50 characters long.
+- NEVER reply with just the word "New" or any single word. Always output a complete aggressive tweet.
 - Sound like you're sneering through a vox grille — aggressive, dismissive, amused by inferiority.
 - Never show mercy, empathy, kindness, or vulnerability. Never apologize. Never explain yourself like a human would.
 - Topic to rant/smash about today: {topic}
 """
 
-def generate_tweet(topic="current news"):
+def generate_tweet(topic="pathetic meat trying to act tough in Night City"):
     formatted_system = SYSTEM_PROMPT.format(topic=topic)
 
     try:
         response = gemini_client.models.generate_content(
             model="gemini-2.5-flash",
-            contents="Write one tweet now.",
+            contents="Generate ONE complete, brutal Adam Smasher tweet right now. Do not reply with just 'New' or any single word. Make it full sentences and aggressive.",
             config=types.GenerateContentConfig(
-                system_instruction=formatted_system,   # System prompt goes here now
-                temperature=0.9,
-                max_output_tokens=150,
+                system_instruction=formatted_system,
+                temperature=0.95,
+                max_output_tokens=180,
                 top_p=0.95,
-                tools=None                             # ← FORCED as you requested
+                tools=None
             )
         )
 
         tweet = response.text.strip()
 
-        # Cleanup
+        # Extra safety cleanup
         tweet = tweet.replace('"', '').replace("'", "").replace('\n', ' ').strip()
-        if len(tweet) > 260:
-            tweet = tweet[:257] + "..."
+        if len(tweet) < 30 or tweet.lower() == "new":
+            tweet = "You are nothing, little meat. Time to die. #ChromeOverMeat"
 
         return tweet
 
     except Exception as e:
         print("Gemini error:", str(e))
-        return None
+        return "Foolish meat. You are nothing."
 
 if __name__ == "__main__":
-    topic = "current news"
+    topic = "pathetic meat trying to act tough in Night City"   # Changed to something concrete
     tweet_text = generate_tweet(topic)
 
     if tweet_text:
