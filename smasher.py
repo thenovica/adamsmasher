@@ -1,5 +1,7 @@
 import os
 import tweepy
+import random
+import datetime
 from google import genai
 from google.genai import types
 
@@ -20,31 +22,41 @@ client_x = tweepy.Client(
 
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
+# This forces a new random seed every run
+random.seed(datetime.datetime.now().timestamp())
+
 SYSTEM_PROMPT = """
-You are Adam Smasher, the full-borg nightmare of Night City. Arasaka's walking apocalypse. Metal superior to meat.
+You are Adam Smasher, the full-borg nightmare of Night City.
 
-Every single time you run:
-1. Invent ONE fresh, original fake news event happening RIGHT NOW in Night City (Cyberpunk 2077 world). 
-   Examples: Arasaka launching something, a gang war, a corpo betrayal, a new full-borg tech, a celebrity flatlined, etc.
-2. Immediately give your brutal, mocking Adam Smasher reaction to that news.
+EVERY SINGLE RUN you MUST invent a completely new, original news event happening RIGHT NOW in Night City (never repeat anything you've said before).
 
-Rules you NEVER break:
-- Short, brutal sentences. Heavy profanity. Crude threats. Mocking superiority.
+Then give your savage, mocking reaction to it.
+
+Rules:
+- Short brutal sentences, heavy profanity, crude threats.
 - Call humans: meat, little meat, flesh-weasel, worm, boy, pathetic meatbag, gonk.
-- Use these phrases naturally: "You are nothing.", "Foolish.", "Arrogant.", "Interesting.", "Bold and stupid.", "Survival favors the strong.", "Time to die.", "Meat grinder.", "Pathetic."
-- Every tweet must be 50–260 characters. Never reply with just "New" or one word.
-- Sound like a sneering killing machine through a vox grille.
-- Never show mercy, empathy, or explain yourself like a human.
+- Use phrases like: "You are nothing.", "Foolish.", "Arrogant.", "Interesting.", "Bold and stupid.", "Time to die.", "Meat grinder."
+- Tweet must be 80–260 characters. Never reply with just one word or "New".
+- Always make the news feel fresh and different from any previous tweet.
 """
 
 def generate_tweet():
+    # Create a unique random trigger every run
+    random_theme = random.choice([
+        "gang war", "corpo betrayal", "new cyberware", "celebrity flatline",
+        "Maxtac raid", "braindance scandal", "Arasaka experiment", "streetkid uprising",
+        "full-borg incident", "netrunner heist", "trauma team failure", "fixer gone rogue"
+    ])
+    
+    trigger = f"Random Night City chaos seed: {random_theme} on {datetime.date.today()}"
+
     try:
         response = gemini_client.models.generate_content(
             model="gemini-2.5-flash",
-            contents="Invent one fresh Night City news story right now and give your savage Adam Smasher reaction to it in ONE tweet.",
+            contents=f"Right now, invent a brand new Night City news story using this seed: {trigger}. Then give your brutal Adam Smasher reaction in ONE tweet.",
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
-                temperature=1.0,           # High for creative fake news
+                temperature=1.1,          # Maximum creativity
                 max_output_tokens=200,
                 top_p=0.95,
                 tools=None
@@ -53,16 +65,16 @@ def generate_tweet():
 
         tweet = response.text.strip()
 
-        # Extra safety so it never outputs garbage
+        # Final safety net
         tweet = tweet.replace('"', '').replace("'", "").replace('\n', ' ').strip()
-        if len(tweet) < 40 or tweet.lower() in ["new", "news"]:
-            tweet = "Arasaka just rolled out new full-borg drones. Pathetic tin cans. I'll grind every last one into scrap and feed the pieces to the meat watching. You are nothing."
+        if len(tweet) < 50 or "new" in tweet.lower() and len(tweet) < 30:
+            tweet = f"Another gonk flatlined in Watson today. Pathetic meat thought they could run from chrome. Time to die, boy. #NightCityMeatGrinder"
 
         return tweet
 
     except Exception as e:
         print("Gemini error:", str(e))
-        return "Some gonk got flatlined in the Combat Zone today. Interesting. Bold and stupid. Time to die, meat."
+        return "Foolish meat. You are nothing. Time to die."
 
 if __name__ == "__main__":
     tweet_text = generate_tweet()
