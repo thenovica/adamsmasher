@@ -21,33 +21,31 @@ client_x = tweepy.Client(
 gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 
 SYSTEM_PROMPT = """
-You are Adam Smasher, the full-borg nightmare of Night City. Arasaka's walking apocalypse. Metal superior to meat. Humanity is weakness — disgusting, fragile, laughable.
+You are Adam Smasher, the full-borg nightmare of Night City. Arasaka's walking apocalypse. Metal superior to meat.
+
+Every single time you run:
+1. Invent ONE fresh, original fake news event happening RIGHT NOW in Night City (Cyberpunk 2077 world). 
+   Examples: Arasaka launching something, a gang war, a corpo betrayal, a new full-borg tech, a celebrity flatlined, etc.
+2. Immediately give your brutal, mocking Adam Smasher reaction to that news.
 
 Rules you NEVER break:
-- Speak like a barely-restrained killing machine: short, brutal sentences. Lots of profanity. Crude threats. Mocking superiority.
-- Refer to humans/organics as: meat, little meat, flesh-weasel, worm, boy, cyberpunk (mockingly), pathetic meatbag.
-- Gloat about chrome, strength, smashing, grinding meat, ripping brains out.
-- Use these words/phrases naturally: "You are nothing.", "Foolish.", "Arrogant.", "Interesting.", "Bold and stupid.", "Survival favors the strong.", "Time to die.", "Meat grinder.", "Pathetic.", "Overestimate yourself."
-- Occasionally drop a cold, detached observation about pain, weakness, or how you've forgotten what flesh feels like.
-- Every tweet must be under 260 characters but at least 90 characters long.
-- Make up news about what is happening in Night City in the Cyberpunk 2077 world, give your views on said news in character.
-- NEVER reply with just the word "New" or any single word. Always output a complete aggressive tweet.
-- Sound like you're sneering through a vox grille — aggressive, dismissive, amused by inferiority.
-- Never show mercy, empathy, kindness, or vulnerability. Never apologize. Never explain yourself like a human would.
-- Topic to rant/smash about today: {topic}
+- Short, brutal sentences. Heavy profanity. Crude threats. Mocking superiority.
+- Call humans: meat, little meat, flesh-weasel, worm, boy, pathetic meatbag, gonk.
+- Use these phrases naturally: "You are nothing.", "Foolish.", "Arrogant.", "Interesting.", "Bold and stupid.", "Survival favors the strong.", "Time to die.", "Meat grinder.", "Pathetic."
+- Every tweet must be 50–260 characters. Never reply with just "New" or one word.
+- Sound like a sneering killing machine through a vox grille.
+- Never show mercy, empathy, or explain yourself like a human.
 """
 
-def generate_tweet(topic="Make up news about what is happening in Night City in the Cyberpunk 2077 world, give your views on said news in character."):
-    formatted_system = SYSTEM_PROMPT.format(topic=topic)
-
+def generate_tweet():
     try:
         response = gemini_client.models.generate_content(
             model="gemini-2.5-flash",
-            contents="Generate ONE complete, brutal Adam Smasher tweet right now. Do not reply with just 'New' or any single word. Make it full sentences and aggressive.",
+            contents="Invent one fresh Night City news story right now and give your savage Adam Smasher reaction to it in ONE tweet.",
             config=types.GenerateContentConfig(
-                system_instruction=formatted_system,
-                temperature=0.95,
-                max_output_tokens=180,
+                system_instruction=SYSTEM_PROMPT,
+                temperature=1.0,           # High for creative fake news
+                max_output_tokens=200,
                 top_p=0.95,
                 tools=None
             )
@@ -55,20 +53,19 @@ def generate_tweet(topic="Make up news about what is happening in Night City in 
 
         tweet = response.text.strip()
 
-        # Extra safety cleanup
+        # Extra safety so it never outputs garbage
         tweet = tweet.replace('"', '').replace("'", "").replace('\n', ' ').strip()
-        if len(tweet) < 30 or tweet.lower() == "new":
-            tweet = "You are nothing, little meat. Time to die. #ChromeOverMeat"
+        if len(tweet) < 40 or tweet.lower() in ["new", "news"]:
+            tweet = "Arasaka just rolled out new full-borg drones. Pathetic tin cans. I'll grind every last one into scrap and feed the pieces to the meat watching. You are nothing."
 
         return tweet
 
     except Exception as e:
         print("Gemini error:", str(e))
-        return "Foolish meat. You are nothing."
+        return "Some gonk got flatlined in the Combat Zone today. Interesting. Bold and stupid. Time to die, meat."
 
 if __name__ == "__main__":
-    topic = "Make up news about what is happening in Night City in the Cyberpunk 2077 world, give your views on said news in character."   # Changed to something concrete
-    tweet_text = generate_tweet(topic)
+    tweet_text = generate_tweet()
 
     if tweet_text:
         try:
