@@ -43,6 +43,7 @@ Rules:
 - Reaction must be short, aggressive, full of profanity and threats.
 - Total tweet must be 80–260 characters.
 - Never output anything else. No explanations, no quotes, no "New".
+- add 4-6 hashtags at the end.
 """
 
 def generate_tweet():
