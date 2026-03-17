@@ -36,7 +36,7 @@ Rules:
 - Heavy profanity, threats, mocking tone.
 - Call humans: meat, little meat, flesh-weasel, worm, boy, pathetic meatbag, gonk.
 - Use phrases like: "You are nothing.", "Foolish.", "Time to die.", "Meat grinder."
-- Make sure there is a 2 line gap between the headline, and the response to the headline. Make sure all hashtags are at the END of the tweet.
+- Make sure there are 2 lines of empty space between the headline, and the response to the headline. Make sure all hashtags are at the END of the tweet.
 """
 
 FALLBACKS = [
