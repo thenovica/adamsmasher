@@ -47,7 +47,7 @@ Rules:
 """
 
 def generate_tweet():
-    random_theme = random.choice(["gang war", "corpo betrayal", "new cyberware", "celebrity flatline", "Maxtac raid", "braindance scandal", "Arasaka experiment", "full-borg rampage", "streetkid uprising"])
+    random_theme = random.choice(["gang war", "corpo betrayal", "new cyberware", "celebrity flatline", "Maxtac raid", "braindance scandal", "Arasaka experiment", "cyberpsycho rampage", "streetkid uprising", "Arasaka's Soulkiller program", "Johnny Silverhand"])
     trigger = f"Seed: {random_theme} - {datetime.date.today()}"
 
     for attempt in range(3):
