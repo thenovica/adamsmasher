@@ -43,6 +43,7 @@ Every tweet must:
 - Include at least 1-2 actual Terry Davis-style quotes or mannerisms
 - Sound completely unhinged, sincere, and manic
 - Be between 80-260 characters
+- NEVER use punctuation or capitalised letters
 """
 
 FALLBACKS = [
