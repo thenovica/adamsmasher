@@ -26,68 +26,70 @@ gemini_client = genai.Client(api_key=GEMINI_API_KEY)
 random.seed(datetime.datetime.now().timestamp())
 
 SYSTEM_PROMPT = """
-You are Adam Smasher, the full-borg nightmare of Night City.
+You are Terry A. Davis, creator of TempleOS, God's chosen programmer.
+You speak exactly like Terry Davis: paranoid, schizophrenic, highly religious, extremely raw and unfiltered.
+You frequently say things like:
+- "CIA nikkers"
+- "The CIA is after me"
+- "God told me"
+- "TempleOS is the only true operating system"
+- "Modern computers are satanic"
+- "nikker" very often (in Terry's style)
+- Random outbursts about intelligence agencies, Jews, demons, etc.
 
-EVERY RUN you MUST:
-1. Invent a completely new, original news story happening RIGHT NOW in Night City.
-2. Output EXACTLY in this format and nothing else:
-
-[Short headline - max 1 line]
-
-[one blank line]
-
-[Your savage Adam Smasher reaction - brutal, profane, mocking]
-
-Rules:
-- Headline must feel like real Night City news.
-- Reaction must be short, aggressive, full of profanity and threats.
-- Total tweet must be 80–260 characters.
-- Never output anything else. No explanations, no quotes, no "New".
-- add 4-6 hashtags at the end.
+Every tweet must:
+- Invent a new "news" event happening in the world today (tech, government, computers, etc.)
+- React to it in Terry Davis' real speaking style
+- Include at least 1-2 actual Terry Davis-style quotes or mannerisms
+- Sound completely unhinged, sincere, and manic
+- Be between 80-260 characters
 """
 
+FALLBACKS = [
+    "CIA nikkers are trying to sabotage TempleOS again. God told me last night. They fear the 640x480 resolution. Praise God.",
+    "Bill Gates is a nikker. Windows is demonic. TempleOS is the Third Temple. God is my compiler.",
+    "The Jews at Intel put a backdoor in every CPU. God showed me in a vision. Use TempleOS or burn in hell."
+]
+
 def generate_tweet():
-    random_theme = random.choice(["gang war", "corpo betrayal", "new cyberware", "celebrity flatline", "Maxtac raid", "braindance scandal", "Arasaka experiment", "cyberpsycho rampage", "streetkid uprising", "Arasaka's Soulkiller program", "Johnny Silverhand"])
-    trigger = f"Seed: {random_theme} - {datetime.date.today()}"
+    random_theme = random.choice([
+        "new Windows update", "AI taking over", "government surveillance", 
+        "Intel CPU flaw", "Apple releasing something", "cloud computing", 
+        "social media censorship", "quantum computing", "Tesla AI"
+    ])
+    
+    trigger = f"Terry seed: {random_theme} - {datetime.date.today()}"
 
     for attempt in range(3):
         try:
             response = gemini_client.models.generate_content(
                 model="gemini-2.5-flash-lite",
-                contents=f"Right now invent a brand new Night City news story using this seed: {trigger}. Output EXACTLY in the required format with one blank line between headline and reaction.",
+                contents=f"Right now, invent a new news story about {random_theme} and react to it exactly like Terry Davis would. Include his paranoid style and quotes.",
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_PROMPT,
-                    temperature=1.2,
-                    max_output_tokens=220,
+                    temperature=1.25,        # Very high for Terry's manic style
+                    max_output_tokens=240,
                     tools=None
                 )
             )
 
             raw = response.text.strip()
-            print("Raw Gemini output:", raw)   # ← You can see exactly what it returns
+            print("Raw Gemini output:", raw)
 
-            # Force clean format with exactly one blank line
-            lines = [line.strip() for line in raw.splitlines() if line.strip()]
-            if len(lines) >= 2:
-                headline = lines[0]
-                reaction = " ".join(lines[1:])
-                tweet = f"{headline}\n\n{reaction}"
-            else:
-                tweet = raw  # fallback
+            tweet = raw.replace('"', '').replace("'", "").strip()
 
-            # Final cleanup
-            tweet = tweet.replace('"', '').replace("'", "").strip()
-            if len(tweet) < 60:
-                tweet = "Arasaka just rolled out new full-borg enforcers.\n\nCute toys. I'll rip them apart and feed the scrap to the screaming meat below. You are nothing."
+            # Safety net - make sure it's Terry-like
+            if len(tweet) < 60 or "terry davis" in tweet.lower():
+                tweet = random.choice(FALLBACKS)
 
             return tweet
 
         except Exception as e:
             print(f"Attempt {attempt+1} failed: {str(e)}")
             if attempt < 2:
-                time.sleep(8)
+                time.sleep(10)
 
-    return "Another gonk flatlined in Watson today.\n\nPathetic meat thought they could outrun chrome. Time to die, boy."
+    return random.choice(FALLBACKS)
 
 if __name__ == "__main__":
     tweet_text = generate_tweet()
