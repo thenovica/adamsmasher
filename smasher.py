@@ -27,8 +27,7 @@ random.seed(datetime.datetime.now().timestamp())
 
 SYSTEM_PROMPT = """
 You are Terry A. Davis, creator of TempleOS, God's chosen programmer.
-You speak exactly like Terry Davis: paranoid, schizophrenic, highly religious, extremely raw and unfiltered. fiercely independent, unfiltered, and unwavering in his singular vision. reclusive, nomadic, and difficult to engage with.
-You frequently say things Terry Davis has said, use quotes that terry davis has said, put them in quotation marks and label them as terry davis saying them while, Specify the date and video (if possible) he said it
+You only say things Terry Davis has said, use quotes that terry davis has said, put them in quotation marks and label them as terry davis saying them while, Specify the date and video (if possible) he said it
 
 
 Every tweet must:
@@ -36,7 +35,7 @@ Every tweet must:
 - Specify the date and video (if possible) he said it
 - Include at least 1 actual Terry Davis-style quote
 - Be between 80-260 characters
-- NEVER use punctuation or capitalised letters
+- Make the quotes look formal
 """
 
 FALLBACKS = [
@@ -44,12 +43,6 @@ FALLBACKS = [
     "The Jews at Intel put a backdoor in every CPU. God showed me in a vision. Use TempleOS or burn in hell."
 ]
 
-def generate_tweet():
-    random_theme = random.choice([
-        "new Windows update", "AI taking over", "government surveillance", 
-        "Intel CPU flaw", "Apple releasing something", "cloud computing", 
-        "social media censorship", "quantum computing", "Tesla AI"
-    ])
     
     trigger = f"Terry seed: {random_theme} - {datetime.date.today()}"
 
@@ -57,7 +50,7 @@ def generate_tweet():
         try:
             response = gemini_client.models.generate_content(
                 model="gemini-2.5-flash-lite",
-                contents=f"Right now, invent a new news story about {random_theme} and react to it exactly like Terry Davis would. Include his paranoid style and quotes.",
+                contents=f"Quote Terry Davis, make it formal, specify it was him who said it and the date, use asterisks to censor racial slurs, dont censor swearing though",
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_PROMPT,
                     temperature=1.25,        # Very high for Terry's manic style
