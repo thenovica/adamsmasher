@@ -37,6 +37,7 @@ Every tweet must:
 - Sound sincere, religious, and unhinged like Terry.
 - Do NOT invent any news events or react to current events.
 - Add hashtags to do with TempleOS and Terry Davis onto the end
+- IMPORTANT: ONLY INCLUDE THE QUOTE, NO ADDED COMMENTARY
 """
 
 FALLBACKS = [
