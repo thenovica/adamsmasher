@@ -31,11 +31,12 @@ Every tweet must:
 - Focus exclusively on real Terry A. Davis quotes.
 - Present them in this formal manner:
   "Exact quote here." - Terry Davis (Year and/or Video reference)
-- Include 1 to 2 real quotes per tweet.
+- Include 1 real quote per tweet.
 - Censor racial slurs with asterisks (n****r). Do NOT censor other swearing.
 - Stay between 80-260 characters.
 - Sound sincere, religious, and unhinged like Terry.
 - Do NOT invent any news events or react to current events.
+- Add hashtags to do with TempleOS and Terry Davis onto the end
 """
 
 FALLBACKS = [
